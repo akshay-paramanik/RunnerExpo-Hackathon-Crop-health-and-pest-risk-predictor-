@@ -1,9 +1,10 @@
 import express from "express";
-import { addPest, getPests } from "../controllers/pestController.js";
+import { addPest, getPests } from "../controller/pestController.js";
+import upload from '../middleware/multer.js'
 
 const router = express.Router();
 
-router.post("/", addPest);
+router.post("/",upload.single('image_url'), addPest);
 router.get("/", getPests);
 
 export default router;

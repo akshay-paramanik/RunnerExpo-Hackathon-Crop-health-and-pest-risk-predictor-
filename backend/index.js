@@ -1,6 +1,12 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
+import { startCronJobs } from "./jobs/cornJobs.js";
+import weatherRoute from "./Routes/weatherRoute.js";
+import lstmRoute from "./Routes/lstmRoute.js"
+import ndviRoutes from "./Routes/ndviRoutes.js";
+import pestRoutes from "./Routes/pestRoutes.js";
+import sensorRoutes from "./Routes/sensorRoutes.js";
 
 import connectDB from "./config/db.js";
 
@@ -12,6 +18,7 @@ dotenv.config();
 
 // connect database
 connectDB();
+startCronJobs()
 
 const app = express();
 
@@ -20,8 +27,11 @@ app.use(cors());
 app.use(express.json());
 
 // routes
-// app.use("/api/weather", weatherRoutes);
-// app.use("/api/ndvi", ndviRoutes);
+app.use("/api/weather", weatherRoute);
+app.use("/api/lstm", lstmRoute);
+app.use("/api/ndvi", ndviRoutes);
+app.use("/api/pest", pestRoutes);
+app.use("/api/sensor", sensorRoutes);
 
 // health check (optional but useful)
 app.get("/", (req, res) => {

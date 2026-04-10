@@ -1,10 +1,12 @@
 import SensorData from "../models/sensorSchema.js";
+import axios from "axios";
 
 // 🔥 Add sensor data (ESP32 will hit this)
 export const addSensorData = async (req, res) => {
   try {
-    const { soilMoisture, temperature, humidity } = req.body;
-
+    const response = await axios.get("https://unprevalent-jettie-unseductive.ngrok-free.dev/fetch");
+    
+    const { soilMoisture, temperature, humidity } = response.data.data;
     const data = await SensorData.create({
       soilMoisture,
       temperature,
@@ -12,6 +14,8 @@ export const addSensorData = async (req, res) => {
     });
 
     res.json(data);
+    console.log(soilMoisture,temperature,humidity);
+    
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -29,3 +33,4 @@ export const getSensorData = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
