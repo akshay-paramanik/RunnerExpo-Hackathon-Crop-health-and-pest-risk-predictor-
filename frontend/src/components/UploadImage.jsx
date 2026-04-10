@@ -38,13 +38,11 @@ export function UploadImage() {
                 <div className="absolute inset-0 bg-black/60 rounded-xl flex items-center justify-center text-center p-4">
 
                   {loading ? (
-                    // 🔥 Loading Animation
                     <div className="flex flex-col items-center gap-3">
                       <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
                       <p className="text-white text-sm">Analyzing image...</p>
                     </div>
                   ) : (
-                    // ✅ Final Text
                     <p className="text-white text-sm">
                       • Improve irrigation balance <br />
                       • Apply organic fertilizers <br />
