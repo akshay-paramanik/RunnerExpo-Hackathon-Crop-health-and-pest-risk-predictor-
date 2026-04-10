@@ -6,6 +6,7 @@ import { AlertsPanel } from './components/AlertsPanel'
 import { WeatherChart } from './components/WeatherChart'
 import { MapPin } from "lucide-react";
 import API from './api/api'
+import axios from 'axios'
 
 function App() {
   const [weatherData, setWeatherData] = useState(null)
@@ -20,6 +21,7 @@ function App() {
   const [timezone, setTimezone] = useState("")
   const [mode, setMode] = useState("hourly");
   const [forecastData, setForecastData] = useState([]);
+  const [sensorData, setSensorData] = useState([])
 
   const fetchData = useCallback(async () => {
     try {
@@ -27,10 +29,7 @@ function App() {
 
       const { lat, lon } = coords
 
-      // ✅ FIXED: correct weather API
-      const weatherRes = await API.get(
-        `/api/weather?lat=${lat}&lon=${lon}`
-      )
+      const weatherRes = await API.get(`/api/weather?lat=${lat}&lon=${lon}`)
 
       const weather = Array.isArray(weatherRes.data)
         ? weatherRes.data[0]
@@ -38,7 +37,6 @@ function App() {
 
       setWeatherData(weather)
 
-      // ✅ history
       setHistory(prev => [
         ...prev.slice(-9),
         {
@@ -52,18 +50,17 @@ function App() {
         }
       ])
 
-      // ✅ FIXED: forecast based on mode
-      const forecastRes = await API.get(
-        `/api/weather/${mode}?lat=${lat}&lon=${lon}`
-      )
+      const forecastRes = await API.get(`/api/weather/${mode}?lat=${lat}&lon=${lon}`)
       setForecastData(forecastRes.data)
 
-      // ✅ NDVI unchanged
       const ndviRes = await API.get(
         `/api/ndvi?temp=${weather.temperature}&humidity=${weather.humidity}&rainfall=${weather.rainfall}`
       )
-
       setNdviData(ndviRes.data)
+
+      // ✅ FIXED SENSOR FETCH
+      const sensorRes = await axios.get("http://localhost:5000/api/sensor")
+      setSensorData(sensorRes.data)
 
       setIsLoading(false)
 
@@ -73,7 +70,6 @@ function App() {
     }
   }, [coords, mode])
 
-  // ⏱️ CLOCK
   useEffect(() => {
     setIsMounted(true)
 
@@ -94,7 +90,6 @@ function App() {
     return () => clearInterval(clockInterval)
   }, [])
 
-  // 🌍 LOCATION
   useEffect(() => {
     setTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone)
 
@@ -131,7 +126,6 @@ function App() {
     )
   }, [])
 
-  // 🔄 AUTO FETCH
   useEffect(() => {
     if (!isMounted) return
     fetchData()
@@ -178,6 +172,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-slate-100">
+
       <header className="bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-4 shadow-lg">
         <div className="mx-auto max-w-7xl">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
@@ -191,7 +186,6 @@ function App() {
                 <h1 className="text-2xl font-bold text-white">
                   Crop Health & Pest Risk Predictor
                 </h1>
-
                 <p className="text-sm text-emerald-100">
                   AI-powered agricultural monitoring system (Live data)
                 </p>
@@ -211,7 +205,6 @@ function App() {
                   href={`https://www.google.com/maps?q=${coords?.lat},${coords?.lon}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className=" link link-underline link-underline-black"
                 >
                   <span>{locationName}</span>
                 </a>
@@ -230,15 +223,15 @@ function App() {
         </div>
       </header>
 
-      {/* MAIN */}
       <main className="mx-auto max-w-7xl p-6">
 
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-5">
 
           <MetricCard title="Temperature" value={weatherData?.temperature} unit="°C" status={tempStatus?.text} statusColor={tempStatus?.color} icon={Thermometer} bgColor="bg-gradient-to-br from-orange-400 to-orange-500" textColor="text-white" />
           <MetricCard title="Humidity" value={weatherData?.humidity} unit="%" status={humidityStatus?.text} statusColor={humidityStatus?.color} icon={Droplets} bgColor="bg-gradient-to-br from-cyan-400 to-cyan-500" textColor="text-white" />
           <MetricCard title="Rainfall" value={weatherData?.rainfall} unit="mm" status="Last 24h" statusColor="bg-blue-600 text-white" icon={CloudRain} bgColor="bg-gradient-to-br from-blue-400 to-blue-500" textColor="text-white" />
           <MetricCard title="Crop Health (NDVI)" value={ndviData?.currentNDVI} unit="" status={ndviStatus?.text} statusColor={ndviStatus?.color} icon={Leaf} bgColor="bg-gradient-to-br from-emerald-400 to-emerald-500" textColor="text-white" />
+          <MetricCard title="Soil Moisture" value={sensorData?.[0]?.soilMoisture} unit="" status={ndviStatus?.text} statusColor={ndviStatus?.color} icon={Leaf} bgColor="bg-gradient-to-br from-emerald-400 to-emerald-500" textColor="text-white"/>
 
         </div>
 
