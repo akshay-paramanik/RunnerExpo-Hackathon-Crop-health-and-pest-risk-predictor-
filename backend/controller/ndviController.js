@@ -1,9 +1,21 @@
 import NDVIData from "../models/ndviSchema.js";
+import locationSchema from "../models/locationSchema.js";
+import axios from "axios";
 
 // 🔥 Add NDVI data (from Python or API)
 export const addNDVI = async (req, res) => {
   try {
-    const { ndvi } = req.body;
+
+    const location = await locationSchema.findOne().sort({ createdAt: -1 });
+
+    if (!location) {
+      return res.status(404).json({ error: "Location not found" });
+    }
+
+    const ndvi = await axios.post('https://unprevalent-jettie-unseductive.ngrok-free.dev/predict/ndvi', {
+      lat: location.lat,
+      lon: location.lon
+    });
 
     const data = await NDVIData.create({ ndvi });
 
@@ -16,9 +28,8 @@ export const addNDVI = async (req, res) => {
 // 🔥 Get latest NDVI data
 export const getNDVI = async (req, res) => {
   try {
-    const data = await NDVIData.find()
-      .sort({ timestamp: -1 })
-      .limit(20);
+    const data = await NDVIData.findOne()
+      .sort({ createdAt: -1 });
 
     res.json(data);
   } catch (error) {

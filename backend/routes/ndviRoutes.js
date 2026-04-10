@@ -1,5 +1,5 @@
 import express from "express";
-import { addNDVI, getNDVI } from "../controllers/ndviController.js";
+import { addNDVI, getNDVI } from "../controller/ndviController.js";
 
 const router = express.Router();
 
