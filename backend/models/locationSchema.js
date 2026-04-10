@@ -9,4 +9,4 @@ const schema = new mongoose.Schema({
     }
 });
 
-export default mongoose.model("SensorData", schema);
+export default mongoose.model("LocationData", schema);
