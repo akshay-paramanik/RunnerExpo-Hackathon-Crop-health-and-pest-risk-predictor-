@@ -1,10 +1,11 @@
 import { useEffect, useState, useCallback } from 'react'
 import { Thermometer, Droplets, CloudRain, Leaf, RefreshCw } from 'lucide-react'
 import { MetricCard } from './components/MetricCard'
-import { PestRiskCard } from './components/PestRiskCard'
+import { ActionPlan } from './components/ActionPlan'
 import { AlertsPanel } from './components/AlertsPanel'
-import { WeatherChart } from './components/WeatherChart'
+import { UploadImage } from './components/UploadImage'
 import { MapPin } from "lucide-react";
+import { Droplet } from "lucide-react"
 import API from './api/api'
 import axios from 'axios'
 
@@ -13,7 +14,7 @@ function App() {
   const [ndviData, setNdviData] = useState(null)
   const [history, setHistory] = useState([])
   const [currentTime, setCurrentTime] = useState('')
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(false)
   const [isMounted, setIsMounted] = useState(false)
 
   const [locationName, setLocationName] = useState("Loading...")
@@ -58,7 +59,7 @@ function App() {
       )
       setNdviData(ndviRes.data)
 
-      // ✅ FIXED SENSOR FETCH
+      // FIXED SENSOR FETCH
       const sensorRes = await axios.get("http://localhost:5000/api/sensor")
       setSensorData(sensorRes.data)
 
@@ -104,7 +105,7 @@ function App() {
 
         try {
           const res = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`
+            `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&accept-language=en`
           )
           const data = await res.json()
 
@@ -112,7 +113,9 @@ function App() {
             data.address.city ||
             data.address.town ||
             data.address.village ||
-            data.address.state ||
+            data.address.hamlet ||
+            data.address.suburb ||
+            data.address.county ||
             "Unknown"
 
           setLocationName(city)
@@ -173,7 +176,7 @@ function App() {
   return (
     <div className="min-h-screen bg-slate-100">
 
-      <header className="bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-4 shadow-lg">
+      {/* <header className="bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-4 shadow-lg">
         <div className="mx-auto max-w-7xl">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
 
@@ -221,6 +224,61 @@ function App() {
             </div>
           </div>
         </div>
+      </header> */}
+
+
+      <header className="bg-gradient-to-r from-emerald-600 to-teal-600 px-4 sm:px-6 py-4 shadow-lg">
+        <div className="mx-auto max-w-7xl">
+
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+
+            {/* LEFT */}
+            <div className="flex items-center gap-3">
+              <div className="rounded-lg bg-white/20 p-2">
+                <Leaf className="h-8 w-8 text-white" />
+              </div>
+
+              <div>
+                <h1 className="text-lg sm:text-2xl font-bold text-white">
+                  Crop Health & Pest Risk Predictor
+                </h1>
+
+                <p className="text-xs sm:text-sm text-emerald-100">
+                  AI-powered agricultural monitoring system (Live data)
+                </p>
+              </div>
+            </div>
+
+            {/* RIGHT */}
+            <div className="flex flex-wrap items-center gap-3 md:text-xl lg:text-xl sm:gap-6 text-sm sm:text-sm font-medium text-emerald-100">
+
+              {/* Time */}
+              <div className="flex items-center gap-1 sm:gap-2">
+                <RefreshCw className="h-4 w-4" />
+                <span>{currentTime}</span>
+              </div>
+
+              {/* Location */}
+              <div className="flex items-center gap-1">
+                <MapPin className="h-4 w-4" />
+                <span>{locationName}</span>
+              </div>
+
+              {/* Coordinates */}
+              {coords && (
+                <div>
+                  {coords.lat.toFixed(2)}°N, {coords.lon.toFixed(2)}°E
+                </div>
+              )}
+
+              {/* Timezone */}
+              <div>
+                {timezone}
+              </div>
+
+            </div>
+          </div>
+        </div>
       </header>
 
       <main className="mx-auto max-w-7xl p-6">
@@ -231,20 +289,22 @@ function App() {
           <MetricCard title="Humidity" value={weatherData?.humidity} unit="%" status={humidityStatus?.text} statusColor={humidityStatus?.color} icon={Droplets} bgColor="bg-gradient-to-br from-cyan-400 to-cyan-500" textColor="text-white" />
           <MetricCard title="Rainfall" value={weatherData?.rainfall} unit="mm" status="Last 24h" statusColor="bg-blue-600 text-white" icon={CloudRain} bgColor="bg-gradient-to-br from-blue-400 to-blue-500" textColor="text-white" />
           <MetricCard title="Crop Health (NDVI)" value={ndviData?.currentNDVI} unit="" status={ndviStatus?.text} statusColor={ndviStatus?.color} icon={Leaf} bgColor="bg-gradient-to-br from-emerald-400 to-emerald-500" textColor="text-white" />
-          <MetricCard title="Soil Moisture" value={sensorData?.[0]?.soilMoisture} unit="" status={ndviStatus?.text} statusColor={ndviStatus?.color} icon={Leaf} bgColor="bg-gradient-to-br from-emerald-400 to-emerald-500" textColor="text-white"/>
+          <MetricCard
+            title="Soil Moisture"
+            value={sensorData?.[0]?.soilMoisture}
+            unit="%"
+            status={ndviStatus?.text}
+            statusColor={ndviStatus?.color}
+            icon={Droplet}
+            bgColor="bg-gradient-to-br from-yellow-800 to-orange-900"
+            textColor="text-white"
+          />
 
         </div>
 
         <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <WeatherChart
-            data={(forecastData.length ? forecastData : history).map(item => ({
-              day: item.day || item.time || item.dt || "Now",
-              temp: item.temp ?? item.temperature,
-              humidity: item.humidity,
-              rainfall: item.rainfall ?? item.rain ?? 0
-            }))}
-          />
-          <PestRiskCard pestRisk={ndviData?.pestRisk} />
+          <UploadImage />
+          <ActionPlan />
         </div>
 
         <div className="mt-6">
