@@ -7,6 +7,7 @@ import lstmRoute from "./Routes/lstmRoute.js"
 import ndviRoutes from "./Routes/ndviRoutes.js";
 import pestRoutes from "./Routes/pestRoutes.js";
 import sensorRoutes from "./Routes/sensorRoutes.js";
+import locationRoute from "./Routes/locationRoute.js";
 
 import connectDB from "./config/db.js";
 
@@ -32,6 +33,7 @@ app.use("/api/lstm", lstmRoute);
 app.use("/api/ndvi", ndviRoutes);
 app.use("/api/pest", pestRoutes);
 app.use("/api/sensor", sensorRoutes);
+app.use("/api/location", locationRoute);
 
 // health check (optional but useful)
 app.get("/", (req, res) => {

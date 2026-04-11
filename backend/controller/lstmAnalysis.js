@@ -2,6 +2,10 @@ import { get24SetData } from "../services/get24setData.js";
 import axios from "axios";
 import { makeDecision } from "../services/makeDecision.js";
 import decisionModel from "../models/decisionModel.js";
+import { config } from "dotenv";
+
+config();
+const AI_BASE_URL = process.env.AI_BASE_URL;
 
 const lstmAnalysisController = {
   analyzeLSTM: async (req, res) => {
@@ -14,7 +18,7 @@ const lstmAnalysisController = {
 
       // ✅ FIX: correct variable name
       const lstmResponse = await axios.post(
-        "https://unprevalent-jettie-unseductive.ngrok-free.dev/predict/lstm",
+        `${AI_BASE_URL}/predict/lstm`,
         { lstmData: latestLstmData }
       );
 
