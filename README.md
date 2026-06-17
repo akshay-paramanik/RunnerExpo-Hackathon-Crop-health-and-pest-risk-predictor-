@@ -1,4 +1,3 @@
-Here’s your **updated README.md** with the change: instead of providing the `ai_model` folder, you give a **Google Drive link** (clean + professional).
 
 ---
 
